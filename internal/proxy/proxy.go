@@ -45,6 +45,10 @@ type InstanceConnConfig struct {
 	// IAMAuthN enables automatic IAM DB Authentication for the instance.
 	// Postgres-only. If it is nil, the value was not specified.
 	IAMAuthN *bool
+
+	// PrivateIP tells the proxy to attempt to connect to the db instance's
+	// private ip address instead of the public IP address
+	PrivateIP *bool
 }
 
 // Config contains all the configuration provided by the caller.
@@ -73,6 +77,10 @@ type Config struct {
 	// IAMAuthN enables automatic IAM DB Authentication for all instances.
 	// Postgres-only.
 	IAMAuthN bool
+
+	// PrivateIP enables connections via the database server's private IP address
+	// for all instances.
+	PrivateIP bool
 
 	// Instances are configuration for individual instances. Instance
 	// configuration takes precedence over global configuration.
@@ -219,6 +227,9 @@ func NewClient(ctx context.Context, d cloudsql.Dialer, cmd *cobra.Command, conf 
 		var opts []cloudsqlconn.DialOption
 		if inst.IAMAuthN != nil {
 			opts = append(opts, cloudsqlconn.WithDialIAMAuthN(*inst.IAMAuthN))
+		}
+		if inst.PrivateIP != nil && *inst.PrivateIP {
+			opts = append(opts, cloudsqlconn.WithPrivateIP())
 		}
 		m := &socketMount{inst: inst.Name, dialOpts: opts}
 		addr, err := m.listen(ctx, network, address)
