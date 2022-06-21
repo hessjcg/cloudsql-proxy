@@ -216,7 +216,7 @@ func parseConfig(cmd *cobra.Command, conf *proxy.Config, args []string) error {
 		conf.DialerOpts = append(conf.DialerOpts, cloudsqlconn.WithIAMAuthN())
 	}
 	if conf.PrivateIP {
-		//TODO somehow register cloudsqlconn.WithPrivateIP()
+		conf.DialerOpts = append(conf.DialerOpts, cloudsqlconn.WithDefaultDialOptions(cloudsqlconn.WithPrivateIP()))
 	}
 
 	if userHasSet("http-port") && !userHasSet("prometheus-namespace") {
